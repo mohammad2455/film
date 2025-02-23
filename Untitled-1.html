@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نمایش ویدیوها</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+        .filters {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .video-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .video-box {
+            background: #222;
+            padding: 10px;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0px 0px 5px rgba(255, 255, 255, 0.1);
+        }
+        .category-label {
+            color: #ccc;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: #6200ea;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #3700b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🎞 نمایش ویدیوها</h2>
+        
+        <!-- فیلتر جستجو و دسته‌بندی -->
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="جستجو بر اساس دسته‌بندی" oninput="filterVideos()">
+            <select id="categorySelect" onchange="filterVideos()">
+                <option value="">انتخاب دسته‌بندی</option>
+            </select>
+        </div>
+
+        <!-- نمایش ویدیوها -->
+        <div id="videoList" class="video-list"></div>
+    </div>
+
+    <script>
+        function loadVideos() {
+            const videoList = document.getElementById("videoList");
+            const categorySelect = document.getElementById("categorySelect");
+            videoList.innerHTML = "";
+            categorySelect.innerHTML = '<option value="">انتخاب دسته‌بندی</option>';
+
+            let videos = JSON.parse(localStorage.getItem("videos")) || [];
+
+            // ایجاد لیست دسته‌بندی‌ها
+            let categories = new Set();
+            videos.forEach(video => {
+                categories.add(video.category);
+            });
+
+            categories.forEach(category => {
+                const option = document.createElement("option");
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+
+            // نمایش ویدیوها
+            videos.forEach((video) => {
+                const div = document.createElement("div");
+                div.classList.add("video-box");
+                div.innerHTML = `
+                    <video controls>
+                        <source src="${video.src}" type="video/mp4">
+                    </video>
+                    <div class="category-label">دسته: ${video.category}</div>
+                `;
+                videoList.appendChild(div);
+            });
+        }
+
+        function filterVideos() {
+            const searchInput = document.getElementById("searchInput").value.toLowerCase();
+            const categorySelect = document.getElementById("categorySelect").value;
+            const videoList = document.getElementById("videoList");
+            videoList.innerHTML = "";
+
+            let videos = JSON.parse(localStorage.getItem("videos")) || [];
+
+            videos = videos.filter(video => {
+                const matchesCategory = categorySelect ? video.category === categorySelect : true;
+                const matchesSearch = video.category.toLowerCase().includes(searchInput);
+                return matchesCategory && matchesSearch;
+            });
+
+            videos.forEach((video) => {
+                const div = document.createElement("div");
+                div.classList.add("video-box");
+                div.innerHTML = `
+                    <video controls>
+                        <source src="${video.src}" type="video/mp4">
+                    </video>
+                    <div class="category-label">دسته: ${video.category}</div>
+                `;
+                videoList.appendChild(div);
+            });
+        }
+
+        loadVideos();
+    </script>
+</body>
+</html>
